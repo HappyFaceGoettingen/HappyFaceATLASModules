@@ -1,0 +1,17 @@
+*.pyc
+*.pyo
+acquire.py
+tools.py
+render.py
+defaultconfig
+HappyFace.db
+__init__.py
+__init__.pyo
+log
+docs
+hf
+LICENSE
+mako_cache  
+templates
+config/categories-enabled
+config/modules-enabled
