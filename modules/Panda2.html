@@ -18,10 +18,13 @@
     <td>Active</td>
     <td>Running</td>
     <td>Defined</td>
+    <td>Assigned</td>
     <td>Holding</td>
     <td>Finished</td>
     <td>Failed</td>
     <td>Cancelled</td>
+    <td>Transferring</td>
+    <td>Merging</td>
     </tr>
     % for site in module.dataset['site_names'].split(','):
         % if rowspan[site] >= 1:
@@ -36,10 +39,13 @@
                         <td bgcolor=#AAFFAA>${detail['active_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['running_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['defined_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['holding_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['finished_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['failed_jobs']}</td>
                         <td bgcolor=#AAFFAA>${detail['cancelled_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
                     % elif detail['status'].lower() == 'online' and 100. - float(detail['efficiency']) >= config['failed_warning'] and 100. - float(detail['efficiency']) < config['failed_critical']:
                         <td bgcolor=#FFFF96><a href=${detail['queue_link']}>${detail['queue_name']}</a></td>
                         <td bgcolor=#FFFF96>${detail['queue_type']}</td>
@@ -48,10 +54,13 @@
                         <td bgcolor=#FFFF96>${detail['active_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['running_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['defined_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['holding_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['finished_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['failed_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['cancelled_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
                     % elif (detail['status'].lower() == 'offline') or (detail['status'].lower() == 'brokeroff'):
                         <td bgcolor=#EEEEEE><a href=${detail['queue_link']}>${detail['queue_name']}</a></td>
                         <td bgcolor=#EEEEEE>${detail['queue_type']}</td>
@@ -60,10 +69,13 @@
                         <td bgcolor=#EEEEEE>${detail['active_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['running_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['defined_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['holding_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['finished_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['failed_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['cancelled_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
                     
                     % else:
                         <td bgcolor=#FF6464><a href=${detail['queue_link']}>${detail['queue_name']}</a></td>
@@ -73,10 +85,13 @@
                         <td bgcolor=#FF6464>${detail['active_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['running_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['defined_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['holding_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['finished_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['failed_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['cancelled_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
                     % endif
                     </tr>
                 % endif
@@ -84,5 +99,66 @@
         % endif
     % endfor
     </table>
+
+
+
+
+    % for site in module.dataset['site_names'].split(','):
+        % for detail in site_details:
+            % if detail['site_name'] == site:
+${detail['filename_failed_plot']}
+<img src="${detail['filename_failed_plot']}" alt=""/>
+            % endif
+        % endfor
+    % endfor
+
+
+
+
+    % for site in module.dataset['site_names'].split(','):
+        % for detail in site_details:
+            % if detail['site_name'] == site:
+
+                <div class="large-12 columns">
+<div class='section'>Worker node slot performance  at ${detail['queue_name']}</div>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data${detail['queue_name']} = google.visualization.arrayToDataTable([${detail['wns_failed']}])
+        var options = {
+          title: 'Failed jobs per WN slot',
+          legend: { position: 'none' },
+          hAxis: {title: 'WN slot (empty bins suppressed)', titleTextStyle: {color: 'black'},  textStyle: { fontSize:11},},
+        };
+
+        var chart${detail['queue_name']} = new google.visualization.ColumnChart(document.getElementById("${detail['queue_name']}1"));
+        chart${detail['queue_name']}.draw(data${detail['queue_name']}, options);
+
+
+        var data2${detail['queue_name']} = google.visualization.arrayToDataTable([${detail['wns_finished']}])
+        var options2 = {
+          title: 'Finished jobs per WN slot',
+          legend: { position: 'none' },
+          hAxis: {title: 'WN (empty bins suppressed)', titleTextStyle: {color: 'black'},  textStyle: { fontSize:11},},
+        };
+
+        var chart2${detail['queue_name']} = new google.visualization.ColumnChart(document.getElementById("${detail['queue_name']}2"));
+        chart2${detail['queue_name']}.draw(data2${detail['queue_name']}, options2);
+
+      }
+    </script>
+
+    <div id="${detail['queue_name']}1" style="height: 500px;"></div>
+
+
+    <div id="${detail['queue_name']}2" style="height: 500px;"></div>
+
+
+            % endif
+        % endfor
+    % endfor
+
 % endif
 </%def>
