@@ -1,5 +1,6 @@
 # Copyright 2013 II. Physikalisches Institut - Georg-August-Universitaet Goettingen
-# Author: Christian Georg Wehrberger (christian@wehrberger.de) (Further editing by Lino Gerlach)
+# Author: Christian Georg Wehrberger (christian@wehrberger.de)
+# Edited by Lino Gerlach (lino.gerlach@stud.uni-goettingen.de)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -44,7 +45,6 @@ class DDM2(hf.module.ModuleBase):
 	Column('end_time', TEXT),
         Column('url_destination_space_tokens', TEXT),
         Column('url_source_space_tokens', TEXT),
-#        Column('url_source_space_tokens', TEXT),
         Column('url_destination_failed_transfers', TEXT),
         Column('url_source_failed_transfers', TEXT),
         Column('destination_successful_transfers_total', INT),

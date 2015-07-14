@@ -1,5 +1,6 @@
 # Copyright 2013 II. Physikalisches Institut - Georg-August-Universitaet Goettingen
 # Author: Christian Georg Wehrberger (christian@wehrberger.de)
+# Edited by Lino Gerlach (lino.gerlach@stud.uni-goettingen.de)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,7 +16,6 @@
 
 import hf
 from sqlalchemy import *
-from BeautifulSoup import BeautifulSoup
 import urllib2,json
 from datetime import datetime
 
@@ -36,16 +36,14 @@ class Panda2(hf.module.ModuleBase):
 
     table_columns = [
         Column('site_names', TEXT),
-        #Column('url', TEXT),#hf.plotgenerator
-        Column('filename_failed_plot', TEXT)
-    ], ['filename_failed_plot']
+    ], []
 
     subtable_columns = {
         'site_details': ([
         Column('wns_failed', TEXT),#New columns for worker node graphs (plotting data is saved as string)
         Column('wns_finished', TEXT),
         Column('filename_failed_plot', TEXT),
-        #Column('filename_finished_plot', TEXT),
+        Column('filename_finished_plot', TEXT),
         Column('site_name', TEXT),
         Column('queue_name', TEXT),
         Column('queue_link', TEXT),
@@ -62,7 +60,7 @@ class Panda2(hf.module.ModuleBase):
         Column('cancelled_jobs', INT),
         Column('transferring_jobs', INT),
         Column('merging_jobs', INT),
-    ], ['filename_failed_plot'])}#, 'filename_finished_plot'])}
+    ], ['filename_failed_plot', 'filename_finished_plot'])}
 
     def prepareAcquisition(self):
 
@@ -180,39 +178,11 @@ class Panda2(hf.module.ModuleBase):
         self.details_db_value_list = []
 
     def extractData(self):
-        import matplotlib
-        import matplotlib.pyplot as plt
-        self.plt = plt
 
         data = {
             'site_names':(self.site_names_nolist),
             'status':1,
         }
-
-        data['filename_failed_plot']=""
-
-        ind = range(4)
-        abule = [1, 2, 3, 4]
-        width = 0.36
-
-        fig_abs = self.plt.figure()
-        fig_rel = self.plt.figure()
-
-        axis_abs = fig_abs.add_subplot(111)
-        axis_rel = fig_rel.add_subplot(111)
-
-        p0 = axis_abs.bar(ind, abule, width, color='violet')
-        p1 = axis_abs.bar(ind, abule, width, color='r')
-
-
-        axis_abs.set_ylabel('Number of failed Jobs')
-        axis_abs.set_xlabel('Name of worker node')
-        axis_abs.set_title('Breng')
-
-        fig_abs.savefig(hf.downloadService.getArchivePath(self.run, self.instance_name +"_wns_failed.png"), dpi=60)
-        data['filename_failed_plot'] = self.instance_name + "_wns_failed.png"
-
-
 
         # check for download errors
         schedconfig_content = ''
@@ -272,59 +242,11 @@ class Panda2(hf.module.ModuleBase):
                     data['status'] = min(data['status'],0.5)
                 elif 100. - float(queue_info['efficiency']) >= int(self.config['failed_critical']):
                     data['status'] = min(data['status'],0.)
-
-#THE FOLLOWING IS FOR PLOTTING (NEEDS TO BE PRETTYFIED)
-                
-                ind = ""
-                numbers = ""
-                ind_failed = queue_info['wns_failed'].split("'Count'],")[1]# Cut off names of variables
-                ind_failed = ind_failed.replace("\n", "")# Delete all new lines, tabulators and spacebars
-                ind_failed = ind_failed.replace("\t", "")
-                ind_failed = ind_failed.replace(" ", "")
-                print(ind_failed)
-                ind_failed = ind_failed.split(',')# Create array out of string
-                #print(ind_failed)
-                for i in range(len(ind_failed)):
-                    if i%2==0:# Iterate over all even entries (name of wn)
-                        ind = ind + ind_failed[i]
-                    else:# Iterate over all odd entries (number of jobs)
-                        numbers = numbers + ind_failed[i]
-                ind = ind.split("'['")
-                numbers = numbers.split("]")
-                numbers = numbers[0:(len(numbers)-1)]# Cut off last entry as it's always empty
-                for i in range(len(numbers)):
-                    numbers[i]=int(numbers[i])
-                print(ind)
-                print(numbers)
-
-                fig_abs = self.plt.figure()
-                fig_rel = self.plt.figure()
-
-                axis_abs = fig_abs.add_subplot(111)
-                axis_rel = fig_rel.add_subplot(111)
-
-                ind = range(len(ind))
-                print(ind)
-
-                p0 = axis_abs.bar(ind, numbers, width, color='violet')
-                #p1 = axis_abs.bar(range(4), range(4), width, color='r')
-
-                axis_abs.set_ylabel('Number of failed Jobs')
-                axis_abs.set_xlabel('Name of worker node')
-                axis_abs.set_title('WNS')
-
-                fig_abs.savefig(hf.downloadService.getArchivePath(self.run, self.instance_name + "_wns_failed.png"), dpi=60)
-                queue_info['filename_failed_plot'] = self.instance_name + "_wns_failed.png"
-                print(queue_info['filename_failed_plot'])
-
+                queue_info['filename_failed_plot'] = grid_site_info.wns_plot(queue,queue_info['wns_failed'],'Failed',self.run,self.instance_name)
+                queue_info['filename_finished_plot'] = grid_site_info.wns_plot(queue,queue_info['wns_finished'],'Finished',self.run,self.instance_name)
 
                 # add to array
                 queue_details[site+'_'+queue+'_analysis'] = queue_info
-
-
-
-
-
 
 
             # parse information from the file for each production queue
@@ -362,13 +284,13 @@ class Panda2(hf.module.ModuleBase):
                     queue_info['efficiency'] = (queue_info['finished_jobs']*100)/(queue_info['finished_jobs'] + queue_info['failed_jobs'])
                 else:
                     queue_info['efficiency'] = 0
+                queue_info['filename_failed_plot'] = grid_site_info.wns_plot(queue,queue_info['wns_failed'],'Failed',self.run,self.instance_name)
+                queue_info['filename_finished_plot'] = grid_site_info.wns_plot(queue,queue_info['wns_finished'],'Finished',self.run,self.instance_name)
 
                 # add to array
                 queue_details[site+'_'+queue+'_production'] = queue_info
 
-                queue_info['filename_failed_plot'] = ""
-
-        self.details_db_value_list = [{'wns_failed':(queue_details[queue])['wns_failed'], 'wns_finished':(queue_details[queue])['wns_finished'], 'site_name':(queue_details[queue])['site_name'], 'queue_type':(queue_details[queue])['queue_type'], 'queue_name':(queue_details[queue])['queue_name'], 'queue_link':(queue_details[queue])['queue_link'],'efficiency':(queue_details[queue])['efficiency'], 'status':(queue_details[queue])['status'], 'active_jobs':(queue_details[queue])['active_jobs'], 'running_jobs':(queue_details[queue])['running_jobs'], 'defined_jobs':(queue_details[queue])['defined_jobs'],'assigned_jobs':(queue_details[queue])['assigned_jobs'], 'holding_jobs':(queue_details[queue])['holding_jobs'], 'finished_jobs':(queue_details[queue])['finished_jobs'], 'failed_jobs':(queue_details[queue])['failed_jobs'], 'cancelled_jobs':(queue_details[queue])['cancelled_jobs'], 'transferring_jobs':(queue_details[queue])['transferring_jobs'], 'merging_jobs':(queue_details[queue])['merging_jobs'],'filename_failed_plot':(queue_details[queue])['filename_failed_plot'],} for queue in queue_details]
+        self.details_db_value_list = [{'wns_failed':(queue_details[queue])['wns_failed'], 'wns_finished':(queue_details[queue])['wns_finished'], 'site_name':(queue_details[queue])['site_name'], 'queue_type':(queue_details[queue])['queue_type'], 'queue_name':(queue_details[queue])['queue_name'], 'queue_link':(queue_details[queue])['queue_link'],'efficiency':(queue_details[queue])['efficiency'], 'status':(queue_details[queue])['status'], 'active_jobs':(queue_details[queue])['active_jobs'], 'running_jobs':(queue_details[queue])['running_jobs'], 'defined_jobs':(queue_details[queue])['defined_jobs'],'assigned_jobs':(queue_details[queue])['assigned_jobs'], 'holding_jobs':(queue_details[queue])['holding_jobs'], 'finished_jobs':(queue_details[queue])['finished_jobs'], 'failed_jobs':(queue_details[queue])['failed_jobs'], 'cancelled_jobs':(queue_details[queue])['cancelled_jobs'], 'transferring_jobs':(queue_details[queue])['transferring_jobs'], 'merging_jobs':(queue_details[queue])['merging_jobs'],'filename_failed_plot':(queue_details[queue])['filename_failed_plot'],'filename_finished_plot':(queue_details[queue])['filename_finished_plot'],} for queue in queue_details]
 
 
         return data
@@ -488,32 +410,52 @@ class cloud_class2:
 
     def get_wns_failed(self,html_content):
         src_text=html_content
-#        soup = BeautifulSoup(src)
-#        src_text = soup.findAll(text=True)
-#        src_text = ''.join(src_text)
         src_text=src_text.split("var data = google.visualization.arrayToDataTable([")[1]#Jump to relevant data
         src_text=src_text.split("])")[0]
-#        print(src_text)
-#        self.resource=src_text
         return src_text
 
     def get_wns_finished(self,html_content):
         src_text=html_content
-#        soup = BeautifulSoup(src)
-#        src_text = soup.findAll(text=True)
-#        src_text = ''.join(src_text)
         src_text=src_text.split("var data2 = google.visualization.arrayToDataTable([")[1]
         src_text=src_text.split("])")[0]
-#        print(src_text)
-#        self.resource=src_text
         return src_text
-    '''
-    def wns_get_numberof_jobs(self,wn_name):
-        for item in self.resource:
-            if wn_name in item:
-                print(item)
-                wn_name_number=int((item.split(' ')[1]).split(']')[0])
-    '''
+
+    #The following function creates the plots and returns their destination
+    def wns_plot(self,queue,wns_content,option,a,b):#option='Failed' or 'Finished', a and b to get self.run and self.instance_name
+        import matplotlib
+        import matplotlib.pyplot as plt
+        self.plt = plt
+        ind = ""
+        numbers = ""
+        ind_failed = wns_content.split("'Count'],")[1]#queue_info['wns_failed'].split("'Count'],")[1]# Cut off names of variables
+        ind_failed = ind_failed.replace("\n", "")# Delete all new lines, tabulators and spacebars
+        ind_failed = ind_failed.replace("\t", "")
+        ind_failed = ind_failed.replace(" ", "")
+        ind_failed = ind_failed.split(',')# Create array out of string
+        for i in range(len(ind_failed)):
+            if i%2==0:# Iterate over all even entries (name of wn)
+                ind = ind + ind_failed[i]
+            else:# Iterate over all odd entries (number of jobs)
+                numbers = numbers + ind_failed[i]
+        ind = ind.split("'['")
+        numbers = numbers.split("]")
+        numbers = numbers[0:(len(numbers)-1)]# Cut off last entry as it's always empty
+        for i in range(len(numbers)):
+            numbers[i]=int(numbers[i])
+ 
+        fig_abs = self.plt.figure()
+        plt.bar(range(len(numbers)), numbers, color='violet')                
+        plt.xticks(range(len(numbers)), ind, size=5, rotation=90)
+        plt.show()
+        axis_abs = fig_abs.add_subplot(111)                
+        axis_abs.set_ylabel('Number of jobs')
+        axis_abs.set_xlabel('Name of WN')
+        axis_abs.set_title(option+' jobs per worker node at '+queue)
+        fig_abs.savefig(hf.downloadService.getArchivePath(a, b+"_"+queue+"_"+option+'.png'), dpi=60)
+        plt.close()
+        dest = "/"+hf.downloadService.getArchivePath(a, b+"_"+queue+"_"+option+'.png')
+        return dest
+
     def get_queue_status(self,queue):
         queue_status="unknown"
         analysis_queues=[]

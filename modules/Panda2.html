@@ -100,21 +100,20 @@
     % endfor
     </table>
 
-
-
-
+<!--Loading the wn-plots for each queue-->
     % for site in module.dataset['site_names'].split(','):
         % for detail in site_details:
             % if detail['site_name'] == site:
-${detail['filename_failed_plot']}
 <img src="${detail['filename_failed_plot']}" alt=""/>
+<img src="${detail['filename_finished_plot']}" alt=""/>
             % endif
         % endfor
     % endfor
 
 
 
-
+<!--Alternative Plotting via Google Visualisation-->
+<!--
     % for site in module.dataset['site_names'].split(','):
         % for detail in site_details:
             % if detail['site_name'] == site:
@@ -159,6 +158,6 @@ ${detail['filename_failed_plot']}
             % endif
         % endfor
     % endfor
-
+-->
 % endif
 </%def>
