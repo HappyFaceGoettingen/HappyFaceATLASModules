@@ -491,4 +491,3 @@ class cloud_class2:
 
     def get_queue_gatekeeper_info(self,queue):
         return 0
-
