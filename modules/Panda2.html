@@ -54,13 +54,13 @@
                         <td bgcolor=#FFFF96>${detail['active_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['running_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['defined_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
+                        <td bgcolor=#FFFF96>${detail['assigned_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['holding_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['finished_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['failed_jobs']}</td>
                         <td bgcolor=#FFFF96>${detail['cancelled_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
+                        <td bgcolor=#FFFF96>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#FFFF96>${detail['merging_jobs']}</td>
                     % elif (detail['status'].lower() == 'offline') or (detail['status'].lower() == 'brokeroff'):
                         <td bgcolor=#EEEEEE><a href=${detail['queue_link']}>${detail['queue_name']}</a></td>
                         <td bgcolor=#EEEEEE>${detail['queue_type']}</td>
@@ -69,13 +69,13 @@
                         <td bgcolor=#EEEEEE>${detail['active_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['running_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['defined_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
+                        <td bgcolor=#EEEEEE>${detail['assigned_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['holding_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['finished_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['failed_jobs']}</td>
                         <td bgcolor=#EEEEEE>${detail['cancelled_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
+                        <td bgcolor=#EEEEEE>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#EEEEEE>${detail['merging_jobs']}</td>
                     
                     % else:
                         <td bgcolor=#FF6464><a href=${detail['queue_link']}>${detail['queue_name']}</a></td>
@@ -85,13 +85,13 @@
                         <td bgcolor=#FF6464>${detail['active_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['running_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['defined_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['assigned_jobs']}</td>
+                        <td bgcolor=#FF6464>${detail['assigned_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['holding_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['finished_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['failed_jobs']}</td>
                         <td bgcolor=#FF6464>${detail['cancelled_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['transferring_jobs']}</td>
-                        <td bgcolor=#AAFFAA>${detail['merging_jobs']}</td>
+                        <td bgcolor=#FF6464>${detail['transferring_jobs']}</td>
+                        <td bgcolor=#FF6464>${detail['merging_jobs']}</td>
                     % endif
                     </tr>
                 % endif
@@ -101,6 +101,7 @@
     </table>
 
 <!--Loading the wn-plots for each queue-->
+
     % for site in module.dataset['site_names'].split(','):
         % for detail in site_details:
             % if detail['site_name'] == site:
